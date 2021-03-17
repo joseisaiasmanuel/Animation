@@ -21,37 +21,26 @@ class LogoApp extends StatefulWidget {
 class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   AnimationController controller;
   Animation<double> animation;
-  Animation <double> animation2;
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-        vsync: this,
-        duration: Duration(seconds: 2)
-    );
-    animation = Tween<double>(begin: 0, end: 300).animate(controller);
+    controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 2));
+    animation = CurvedAnimation(parent: controller,curve: Curves.fastOutSlowIn);
     animation.addStatusListener((status) {
-      if(status ==AnimationStatus.completed){
+      if (status == AnimationStatus.completed) {
         controller.reverse();
-      }else if (status == AnimationStatus.dismissed){
+      } else if (status == AnimationStatus.dismissed) {
         controller.forward();
-
       }
-
     });
-    animation2 = Tween<double>(begin: 0, end: 150).animate(controller);
-    animation2.addStatusListener((status) {
-      if(status ==AnimationStatus.completed){
-        controller.reverse();
-      }else if (status == AnimationStatus.dismissed){
-        controller.forward();
 
-      }
+   animation.addListener(() {
+     print(animation.value);
+   });
 
-    });
     controller.forward();
-
   }
 
   @override
@@ -62,18 +51,8 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children:<Widget> [
-    GrowTransition(
-    child: LogoWidget(),
-    animation:animation
-    ) ,
-        GrowTransition(
-            child: LogoWidget(),
-            animation:animation2
-        )
-      ],
-    );
+    return Center(
+        child: IsaiasTransition(child: LogoWidget(), animation: animation));
   }
 }
 
@@ -102,20 +81,25 @@ class LogoWidget extends StatelessWidget {
   }
 }
 
-class GrowTransition extends StatelessWidget {
+class IsaiasTransition extends StatelessWidget {
   final Widget child;
   final Animation<double> animation;
-  GrowTransition({this.child, this.animation});
+  final sizeTween= Tween<double>(begin: 0,end: 300);
+  final opacyteTween= Tween<double>(begin: 0.1,end:1);
+  IsaiasTransition({this.child, this.animation});
   @override
   Widget build(BuildContext context) {
     return Center(
       child: AnimatedBuilder(
         animation: animation,
-        builder: (context,child){
-          return Container(
-            height: animation.value,
-            width: animation.value,
-            child:child,
+        builder: (context, child) {
+          return Opacity(
+            opacity: opacyteTween.evaluate(animation).clamp(0, 1.0),
+            child: Container(
+              height: sizeTween.evaluate(animation),
+              width: sizeTween.evaluate(animation),
+              child: child,
+            ),
           );
         },
         child: child,
@@ -123,5 +107,3 @@ class GrowTransition extends StatelessWidget {
     );
   }
 }
-
-
